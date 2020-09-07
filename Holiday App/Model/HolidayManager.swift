@@ -10,46 +10,43 @@ import Foundation
 
 struct HolidayManager {
     
-    let baseUrl = "https://calendarific.com/api/v2/holidays"
-    let apiKey = "358c5148be43c02b84ed8a656b46faa708285d06"
-    
-    func getDataFromServer(from countryName : String){
-        let mainUrl = "\(baseUrl)/?&api_key=\(apiKey)&country=\(countryName)&year=2020"
-        print(mainUrl)
-        if let url = URL(string: mainUrl){
+    func fetchData(onCompletion : @escaping (HolidayData) -> Void){
+        
+        let mainURL = "\(Constants.BASE_URL)?api_key=\(Constants.API_KEY)&country=IN&year=2020"
+        
+        guard let url = URL(string: mainURL) else{
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
             
-            let session = URLSession(configuration: .default)
             
-            let task = session.dataTask(with: url) { (data, response, error) in
-                if error != nil{
-                    print(error!)
-                }
-                
-                if let safeData = data{
-                    let parsedData = self.parseJson(safeData)
-                }
+            if let error = error{
+                print(error.localizedDescription)
+                return
             }
-            task.resume()
-        }
-    
-    }
-    
-    func parseJson(_ holidayData : Data){
-        let decoder = JSONDecoder()
-        do{
-            let decodedData = try decoder.decode(HolidayData.self, from: holidayData)
-            let name = decodedData.response.holidays[0].name
-            let description = decodedData.response.holidays[0].description
-            let date = decodedData.response.holidays[0].date
             
-            print(name)
-            print(description)
-            print(date)
-         
-        }
-        catch{
-            print(error)
-        }
+            guard let safeData = data else{
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            
+            do{
+                let decodedData = try decoder.decode(HolidayData.self, from: safeData)
+                onCompletion(decodedData)
+            }
+            catch{
+                print(error.localizedDescription)
+            }
+            
+            
+            
+            
+            
+        }.resume()
+        
+        
     }
     
     

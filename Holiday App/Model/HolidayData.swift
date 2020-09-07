@@ -9,20 +9,20 @@
 import Foundation
 
 
-struct HolidayData : Codable{
+struct HolidayData : Decodable{
     let response : Response
 }
 
-struct Response : Codable{
+struct Response : Decodable{
     let holidays : [Holidays]
 }
 
-struct Holidays : Codable {
+struct Holidays : Decodable {
     let name : String
     let description : String
     let date : Date
 }
 
-struct Date : Codable{
+struct Date : Decodable{
     let iso : String
 }
